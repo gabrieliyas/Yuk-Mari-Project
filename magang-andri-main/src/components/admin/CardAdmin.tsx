@@ -21,7 +21,6 @@ const Dashboard: React.FC = () => {
   return (
     <SearchProvider>
       <div className="dashboard">
-        <ProtectedRoute>
           <>
             <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
             <main className="main-content">
@@ -38,8 +37,7 @@ const Dashboard: React.FC = () => {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
-          </>
-        </ProtectedRoute>
+          </>  
       </div>
     </SearchProvider>
   );

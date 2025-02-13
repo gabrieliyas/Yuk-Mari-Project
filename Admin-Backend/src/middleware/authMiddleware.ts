@@ -2,16 +2,19 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import pool from '../config/database';
+import { StringDataType } from 'sequelize';
 
 interface User {
   id: number;
   email: string;
   password: string;
+  role: StringDataType
 }
 
 interface JWTPayload {
   id: string;
   email: string;
+  role: string;
 }
 
 declare global {
@@ -94,7 +97,7 @@ export const loginHandler = async (
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { id: user.id, email: user.email, role: user.role},
       process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '1d' }
     );
@@ -105,7 +108,8 @@ export const loginHandler = async (
       token,
       user: {
         id: user.id,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
   } catch (error) {
@@ -116,4 +120,19 @@ export const loginHandler = async (
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
+};
+
+export const adminMiddleware = (
+  req: Request, 
+  res: Response, 
+  next: NextFunction
+): void => {
+  if (!req.user || req.user.role !== 'admin') {
+    res.status(403).json({ 
+      success: false,
+      message: 'Access denied. Admins only.' 
+    });
+    return;
+  }
+  next();
 };
